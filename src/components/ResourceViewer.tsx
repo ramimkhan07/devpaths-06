@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Maximize2, Minimize2, RefreshCw, ArrowLeft, ArrowRight, Home } from 'lucide-react';
@@ -29,16 +29,48 @@ interface ResourceViewerProps {
 export const ResourceViewer: React.FC<ResourceViewerProps> = ({ resource, isOpen, onClose }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Reset states when resource changes
+  useEffect(() => {
+    if (resource) {
+      setHasError(false);
+      setIsLoading(true);
+      setIframeKey(prev => prev + 1);
+      
+      // Set a timeout to detect if iframe never loads
+      const timeout = setTimeout(() => {
+        if (isLoading) {
+          setHasError(true);
+          setIsLoading(false);
+          toast.error('Resource took too long to load. Try opening in a new tab.');
+        }
+      }, 10000); // 10 second timeout
+
+      return () => clearTimeout(timeout);
+    }
+  }, [resource, isLoading]);
 
   const handleRefresh = () => {
+    setHasError(false);
+    setIsLoading(true);
     setIframeKey(prev => prev + 1);
     toast.success('Resource refreshed');
   };
 
   const handleOpenExternal = () => {
     if (resource) {
-      window.open(resource.url, '_blank', 'noopener,noreferrer');
-      toast.success('Opened in new tab');
+      const newWindow = window.open(resource.url, '_blank', 'noopener,noreferrer');
+      if (!newWindow) {
+        toast.error('Please allow popups for this site or copy the URL manually');
+        // Fallback: copy URL to clipboard
+        navigator.clipboard?.writeText(resource.url).then(() => {
+          toast.success('URL copied to clipboard');
+        });
+      } else {
+        toast.success('Opened in new tab');
+      }
     }
   };
 
@@ -126,35 +158,81 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({ resource, isOpen
         </DialogHeader>
 
         <div className="flex-1 relative bg-white">
-          <iframe
-            key={iframeKey}
-            src={resource.url}
-            className="w-full h-full border-0"
-            title={resource.title}
-            loading="lazy"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation"
-            referrerPolicy="strict-origin-when-cross-origin"
-            onError={() => {
-              toast.error('Failed to load resource. You can open it in a new tab instead.');
-            }}
-            onLoad={() => {
-              const loadingOverlay = document.getElementById('loading-overlay');
-              if (loadingOverlay) {
-                loadingOverlay.style.opacity = '0';
-                setTimeout(() => {
-                  loadingOverlay.style.display = 'none';
-                }, 300);
-              }
-            }}
-          />
+          {!hasError ? (
+            <iframe
+              key={iframeKey}
+              src={resource.url}
+              className="w-full h-full border-0"
+              title={resource.title}
+              loading="lazy"
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation allow-popups-to-escape-sandbox"
+              referrerPolicy="strict-origin-when-cross-origin"
+              onError={() => {
+                setHasError(true);
+                setIsLoading(false);
+                toast.error('Resource cannot be embedded. Opening in new tab instead.');
+              }}
+              onLoad={(e) => {
+                const iframe = e.target as HTMLIFrameElement;
+                
+                try {
+                  // Check if iframe content is accessible
+                  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                  if (!iframeDoc || iframeDoc.location.href === 'about:blank') {
+                    throw new Error('Cannot access iframe content');
+                  }
+                  
+                  setIsLoading(false);
+                  setHasError(false);
+                } catch (error) {
+                  // Iframe is blocked, show error state
+                  setHasError(true);
+                  setIsLoading(false);
+                }
+              }}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <div className="flex flex-col items-center gap-4 max-w-md text-center p-6">
+                <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <ExternalLink className="w-8 h-8 text-destructive" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">Cannot Embed Resource</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    This resource cannot be displayed in our viewer due to security restrictions. You can still access it by opening it in a new tab.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleOpenExternal}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open in New Tab
+                  </Button>
+                  <Button variant="outline" onClick={handleRefresh}>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Try Again
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Loading overlay */}
-          <div className="absolute inset-0 bg-background/80 flex items-center justify-center pointer-events-none opacity-100 transition-opacity duration-300" id="loading-overlay">
-            <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="text-sm text-muted-foreground">Loading resource...</p>
+          {isLoading && !hasError && (
+            <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p className="text-sm text-muted-foreground">Loading resource...</p>
+                <p className="text-xs text-muted-foreground max-w-sm text-center">
+                  If this takes too long, the resource may not support embedding.
+                </p>
+                <Button variant="outline" size="sm" onClick={handleOpenExternal}>
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  Open in New Tab Instead
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Bottom toolbar for fullscreen mode */}
@@ -200,6 +278,25 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({ resource, isOpen
             </Button>
           </div>
         )}
+
+        {/* Error fallback - shows when iframe fails to load */}
+        <div className="absolute inset-0 bg-background/90 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300" id="error-fallback" style={{ display: 'none' }}>
+          <div className="flex flex-col items-center gap-4 max-w-md text-center p-6">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+              <ExternalLink className="w-8 h-8 text-destructive" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Cannot Embed Resource</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                This resource cannot be displayed in our viewer due to security restrictions. You can still access it by opening it in a new tab.
+              </p>
+            </div>
+            <Button onClick={handleOpenExternal} className="pointer-events-auto">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Open in New Tab
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

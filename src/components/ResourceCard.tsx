@@ -113,9 +113,44 @@ export const ResourceCard = ({ resource, className = "", showPlatform = true, co
 
   const handleVisit = () => {
     setIsVisited(true);
-    setViewerResource(resource);
-    setIsViewerOpen(true);
-    toast.success('Opening resource in app');
+    
+    // Check if the URL is likely to work in an iframe
+    const isEmbeddable = checkIfEmbeddable(resource.url);
+    
+    if (isEmbeddable) {
+      setViewerResource(resource);
+      setIsViewerOpen(true);
+      toast.success('Opening resource in app');
+    } else {
+      // Open directly in new tab for better compatibility
+      window.open(resource.url, '_blank', 'noopener,noreferrer');
+      toast.success('Opening resource in new tab');
+    }
+  };
+
+  const checkIfEmbeddable = (url: string): boolean => {
+    // List of domains that typically allow iframe embedding
+    const embeddableDomains = [
+      'youtube.com',
+      'youtu.be',
+      'codepen.io',
+      'codesandbox.io',
+      'jsfiddle.net',
+      'replit.com',
+      'stackblitz.com',
+      'developer.mozilla.org',
+      'w3schools.com',
+      'freecodecamp.org'
+    ];
+    
+    try {
+      const domain = new URL(url).hostname.toLowerCase();
+      return embeddableDomains.some(embeddableDomain => 
+        domain.includes(embeddableDomain)
+      );
+    } catch {
+      return false;
+    }
   };
 
   if (compact) {
