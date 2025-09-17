@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Base colors - DevPath inspired theme */
+    --background: 248 39% 12%;
+    --foreground: 0 0% 95%;
+
+    /* Card colors */
+    --card: 249 22% 12%;
+    --card-foreground: 0 0% 95%;
+
+    /* Popover colors */
+    --popover: 249 22% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    /* Brand colors - Purple theme */
+    --primary: 258 100% 67%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 258 100% 75%;
+
+    /* Secondary colors */
+    --secondary: 249 22% 17%;
+    --secondary-foreground: 0 0% 95%;
+
+    /* Accent colors - Blue accent */
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Muted colors */
+    --muted: 249 15% 25%;
+    --muted-foreground: 249 15% 65%;
+
+    /* Status colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 48 96% 53%;
+    --warning-foreground: 249 22% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* UI colors */
+    --border: 249 15% 25%;
+    --input: 249 15% 25%;
+    --ring: 258 100% 67%;
+
+    /* DevPath style gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(258 100% 67%), hsl(280 100% 45%));
+    --gradient-secondary: linear-gradient(135deg, hsl(249 22% 17%), hsl(258 80% 30%));
+    --gradient-accent: linear-gradient(135deg, hsl(217 91% 60%), hsl(258 100% 67%));
+    --gradient-hero: linear-gradient(135deg, hsl(280 100% 45%) 0%, hsl(258 100% 67%) 50%, hsl(217 91% 60%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(249 22% 12% / 0.3);
+    --shadow-md: 0 4px 6px -1px hsl(249 22% 12% / 0.4);
+    --shadow-lg: 0 10px 15px -3px hsl(249 22% 12% / 0.5);
+    --shadow-glow: 0 0 30px hsl(258 100% 67% / 0.4);
+
+    --radius: 0.75rem;
+
+    /* Sidebar */
+    --sidebar-background: 249 22% 12%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 258 100% 67%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 249 15% 20%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 249 15% 25%;
+    --sidebar-ring: 258 100% 67%;
+  }
+
+  .dark {
+    /* Base colors - Darker DevPath theme */
+    --background: 249 39% 8%;
+    --foreground: 0 0% 98%;
+
+    /* Card colors */
+    --card: 249 22% 10%;
+    --card-foreground: 0 0% 98%;
+
+    /* Popover colors */
+    --popover: 249 22% 10%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Brand colors */
+    --primary: 258 100% 70%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 258 100% 80%;
+
+    /* Secondary colors */
+    --secondary: 249 22% 15%;
+    --secondary-foreground: 0 0% 98%;
+
+    /* Accent colors */
+    --accent: 217 91% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Muted colors */
+    --muted: 249 15% 20%;
+    --muted-foreground: 249 15% 70%;
+
+    /* Status colors */
+    --success: 142 76% 46%;
+    --success-foreground: 0 0% 100%;
+    --warning: 48 96% 63%;
+    --warning-foreground: 249 22% 10%;
+    --destructive: 0 84% 70%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* UI colors */
+    --border: 249 15% 20%;
+    --input: 249 15% 20%;
+    --ring: 258 100% 70%;
+
+    /* Enhanced gradients for dark mode */
+    --gradient-primary: linear-gradient(135deg, hsl(258 100% 70%), hsl(280 100% 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(249 22% 15%), hsl(258 80% 35%));
+    --gradient-accent: linear-gradient(135deg, hsl(217 91% 65%), hsl(258 100% 70%));
+    --gradient-hero: linear-gradient(135deg, hsl(280 100% 50%) 0%, hsl(258 100% 70%) 50%, hsl(217 91% 65%) 100%);
+
+    /* Enhanced shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.4);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 30px hsl(258 100% 70% / 0.5);
+
+    /* Sidebar */
+    --sidebar-background: 249 22% 8%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 258 100% 70%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 249 15% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 249 15% 20%;
+    --sidebar-ring: 258 100% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
