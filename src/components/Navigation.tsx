@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Menu, X, Home, Map, BookOpen, Brain, User, LogOut } from 'lucide-react';
+import { Menu, X, Home, Map, BookOpen, Brain, User, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface NavigationProps {
   className?: string;
@@ -78,6 +79,12 @@ export const Header = ({ children, showNav = true }: HeaderProps) => {
           <User className="mr-2 h-4 w-4" />
           Profile
         </DropdownMenuItem>
+        <Link to="/admin">
+          <DropdownMenuItem className="cursor-pointer">
+            <Shield className="mr-2 h-4 w-4" />
+            Admin Panel
+          </DropdownMenuItem>
+        </Link>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
@@ -103,6 +110,7 @@ export const Header = ({ children, showNav = true }: HeaderProps) => {
           
           {children || (
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               {user ? (
                 <UserMenu />
               ) : (
